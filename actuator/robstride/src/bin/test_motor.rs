@@ -1,6 +1,9 @@
 use eyre::Result;
 use robstride::robstride03::{RobStride03, RobStride03Command};
+#[cfg(feature = "socketcan")]
 use robstride::SocketCanTransport;
+#[cfg(not(feature = "socketcan"))]
+use robstride::StubTransport;
 use robstride::{Actuator, ControlCommand, Protocol, Transport, TxCommand, TypedCommandData};
 use std::sync::Arc;
 use std::time::Duration;
@@ -19,8 +22,13 @@ async fn main() -> Result<()> {
     // Create channel for sending commands
     let (tx, mut rx) = mpsc::channel(32);
 
+    #[cfg(feature = "socketcan")]
     // Initialize CAN transport
     let transport = SocketCanTransport::new("can1".to_string()).await?;
+
+    #[cfg(not(feature = "socketcan"))]
+    let transport = StubTransport::new("can1".to_string());
+
     let mut transport_clone = transport.clone(); // Make this mutable
 
     // Spawn transport handling task
