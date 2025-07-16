@@ -14,6 +14,7 @@ use crate::{
     robstride02::{RobStride02, RobStride02Command, RobStride02Feedback, RobStride02Parameter},
     robstride03::{RobStride03, RobStride03Command, RobStride03Feedback, RobStride03Parameter},
     robstride04::{RobStride04, RobStride04Command, RobStride04Feedback, RobStride04Parameter},
+    robstride06::{RobStride06, RobStride06Command, RobStride06Feedback, RobStride06Parameter},
     transport::TransportType,
     Actuator, Command, ControlCommand, FeedbackFrame, Frame, Protocol, TxCommand,
 };
@@ -355,6 +356,9 @@ impl Supervisor {
                     ActuatorType::RobStride04 => {
                         Box::new(RobStride04::new(id, host_id, transport_tx.clone()))
                     }
+                    ActuatorType::RobStride06 => {
+                        Box::new(RobStride06::new(id, host_id, transport_tx.clone()))
+                    }
                 },
                 None => Box::new(RobStride04::new(id, host_id, transport_tx.clone())),
             };
@@ -400,6 +404,10 @@ impl Supervisor {
                                 ),
                                 ActuatorType::RobStride04 => (
                                     Box::new(RobStride04::new(id, host_id, transport_tx.clone())),
+                                    config.clone(),
+                                ),
+                                ActuatorType::RobStride06 => (
+                                    Box::new(RobStride06::new(id, host_id, transport_tx.clone())),
                                     config.clone(),
                                 ),
                             },
@@ -667,6 +675,12 @@ impl Supervisor {
                 ..Default::default()
             }
             .to_control_command(),
+            ActuatorType::RobStride06 => RobStride06Command {
+                kp: config.kp,
+                kd: config.kd,
+                ..Default::default()
+            }
+            .to_control_command(),
         };
 
         record.state.control_config = config.clone();
@@ -750,6 +764,13 @@ impl Supervisor {
                 ..Default::default()
             }
             .to_control_command(),
+            ActuatorType::RobStride06 => RobStride06Command {
+                target_angle_rad: position,
+                target_velocity_rads: velocity,
+                torque_nm: torque,
+                ..Default::default()
+            }
+            .to_control_command()
         };
 
         record.state.control_command.target_angle = cmd.target_angle;
@@ -814,6 +835,9 @@ impl Supervisor {
                     }
                     ActuatorType::RobStride04 => {
                         Box::new(RobStride04Feedback::from_feedback_frame(feedback.clone()))
+                    }
+                    ActuatorType::RobStride06 => {
+                        Box::new(RobStride06Feedback::from_feedback_frame(feedback.clone()))
                     }
                 };
 
