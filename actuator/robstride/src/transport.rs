@@ -1,6 +1,6 @@
 use eyre::Error;
 #[cfg(feature = "socketcan")]
-use socketcan::async_std::CanSocket;
+use socketcan::tokio::CanSocket;
 #[cfg(feature = "socketcan")]
 use socketcan::{EmbeddedFrame, ExtendedId};
 use std::sync::Arc;
@@ -229,7 +229,7 @@ impl Transport for SocketCanTransport {
 
             {
                 let socket = socket.lock().await;
-                socket.write_frame(&msg).await?;
+                socket.write_frame(msg).await?;
             }
             Ok(())
         })

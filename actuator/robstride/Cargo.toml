@@ -23,7 +23,7 @@ instant_command = []
 
 async-trait = "0.1"
 tokio = { version = "1", features = ["full"] }
-socketcan = { version = "3.3", features = ["async-std"], optional = true }
+socketcan = { version = "3.3", features = ["tokio"], optional = true }
 tokio-serial = "5.4"
 eyre = "0.6"
 tracing = "0.1"
