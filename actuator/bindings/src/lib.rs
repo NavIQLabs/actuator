@@ -2,7 +2,7 @@ use pyo3::prelude::PyErr;
 use pyo3::prelude::*;
 use pyo3_stub_gen::define_stub_info_gatherer;
 use pyo3_stub_gen::derive::{gen_stub_pyclass, gen_stub_pyfunction, gen_stub_pymethods};
-#[cfg(target_os = "linux")]
+#[cfg(feature = "socketcan")]
 use robstride::SocketCanTransport;
 use robstride::{
     ActuatorConfiguration, ActuatorType, CH341Transport, ControlConfig, StubTransport, Supervisor,
@@ -168,21 +168,21 @@ impl CH341TransportWrapper {
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(feature = "socketcan")]
 #[gen_stub_pyclass]
 #[pyclass]
 pub struct SocketCanTransportWrapper {
     transport: SocketCanTransport,
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(feature = "socketcan")]
 impl SocketCanTransportWrapper {
     fn get_transport(&self) -> SocketCanTransport {
         self.transport.clone()
     }
 }
 
-#[cfg(target_os = "linux")]
+#[cfg(feature = "socketcan")]
 #[gen_stub_pymethods]
 #[pymethods]
 impl SocketCanTransportWrapper {
@@ -393,7 +393,7 @@ impl RobstrideActuator {
         }
 
         // Try to extract SocketCanTransport (Linux only)
-        #[cfg(target_os = "linux")]
+        #[cfg(feature = "socketcan")]
         if let Ok(socketcan_wrapper) = transport_obj.extract::<PyRef<SocketCanTransportWrapper>>(py)
         {
             return Ok(TransportType::SocketCAN(socketcan_wrapper.get_transport()));
@@ -437,7 +437,7 @@ fn bindings(m: &Bound<PyModule>) -> PyResult<()> {
     m.add_class::<RobstrideActuatorState>()?;
     m.add_class::<RobstrideActuatorConfig>()?;
     m.add_class::<CH341TransportWrapper>()?;
-    #[cfg(target_os = "linux")]
+    #[cfg(feature = "socketcan")]
     m.add_class::<SocketCanTransportWrapper>()?;
     m.add_class::<StubTransportWrapper>()?;
     Ok(())

@@ -21,3 +21,6 @@ robstride = { path = "../robstride" }
 tokio = { version = "1.0", features = ["full"] }
 eyre = "0.6"
 tracing = "0.1"
+
+[features]
+socketcan = ["robstride/socketcan"]
